@@ -1,3 +1,4 @@
+"""Keyboard buttons module"""
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
 

@@ -1,14 +1,15 @@
+"""Queries module"""
 import os
 from aiogram import types
-from sqlalchemy.orm import selectinload
-from sqlalchemy import URL
-from db import BaseModel, User, create_async_engine,\
-    get_session_maker, proceed_chemas
 from sqlalchemy import select, update
+from sqlalchemy.orm import selectinload
+from sqlalchemy.engine import URL
+from db import BaseModel, User, create_async_engine,\
+    get_session_maker, proceed_schemas
 
 
 async def sql_start():
-    global async_engine, session_maker
+    """Start method"""
     postgres_url = URL.create(
             'postgresql+asyncpg',
             username=os.getenv('PG_USER'),
@@ -20,10 +21,13 @@ async def sql_start():
 
     async_engine = create_async_engine(postgres_url)
     session_maker = get_session_maker(async_engine)
-    await proceed_chemas(async_engine, BaseModel.metadata)
+    await proceed_schemas(async_engine, BaseModel.metadata)
+    return session_maker
 
 
 async def checking_user(message: types.Message):
+    """Check user method"""
+    session_maker = await sql_start()
     async with session_maker() as session:
         async with session.begin():
             result = await session.execute(
@@ -49,6 +53,7 @@ async def get_user(message: types.Message) -> User:
     :param session_maker:
     :return:
     """
+    session_maker = await sql_start()
     async with session_maker() as session:
         async with session.begin():
             result = await session.execute(
@@ -60,6 +65,8 @@ async def get_user(message: types.Message) -> User:
 
 
 async def upload_settings(message: types.Message, state):
+    """Upload settings method"""
+    session_maker = await sql_start()
     async with session_maker() as session:
         async with session.begin():
             async with state.proxy() as data:
@@ -72,6 +79,8 @@ async def upload_settings(message: types.Message, state):
 
 
 async def get_photo(message: types.Message):
+    """Get photo method"""
+    session_maker = await sql_start()
     async with session_maker() as session:
         async with session.begin():
             result = await session.execute(
@@ -83,6 +92,8 @@ async def get_photo(message: types.Message):
 
 
 async def get_target(message: types.Message):
+    """Get target method"""
+    session_maker = await sql_start()
     async with session_maker() as session:
         async with session.begin():
             result = await session.execute(
@@ -94,6 +105,8 @@ async def get_target(message: types.Message):
 
 
 async def get_method(message: types.Message):
+    """Get method"""
+    session_maker = await sql_start()
     async with session_maker() as session:
         async with session.begin():
             result = await session.execute(

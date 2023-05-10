@@ -1,9 +1,11 @@
+"""User module"""
 from sqlalchemy import Column, Integer, VARCHAR
 
 from .base import BaseModel
 
 
 class User(BaseModel):
+    """User model class"""
     __tablename__ = 'users'
 
     # Telegram user id
@@ -23,3 +25,6 @@ class User(BaseModel):
 
     def __str__(self) -> str:
         return f'<User:{self.user_id}>'
+
+    def __eq__(self, other):
+        return self.user_id == other.user_id

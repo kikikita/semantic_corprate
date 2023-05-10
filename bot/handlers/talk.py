@@ -1,19 +1,18 @@
-from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters.state import State, StatesGroup
-from aiogram import types, Dispatcher
-from create_bot import bot
+"""Talk module"""
+import io
+import os
+import requests
+import openai
+from aiogram import types
+from aiogram.dispatcher import FSMContext, Dispatcher
 from aiogram.dispatcher.filters import Text
-from keyboards import kb_target_settings, kb_client, kb_method_settings,\
-                      kb_remove, kb_cancel, kb_useful_settings, kb_photo_load
+from aiogram.dispatcher.filters.state import State, StatesGroup
+from create_bot import bot
+from keyboards import kb_target_settings, kb_client, kb_method_settings, \
+    kb_remove, kb_cancel, kb_useful_settings, kb_photo_load
 from db.queries import upload_settings, get_method, get_photo
 from models import classify, text_to_video, translate
-import requests
 from PIL import Image
-import io
-
-import openai
-import os
-
 
 URI_INFO = f"https://api.telegram.org/bot{os.getenv('TOKEN')}/getFile?file_id="
 URI = f"https://api.telegram.org/file/bot{os.getenv('TOKEN')}/"
@@ -22,15 +21,31 @@ openai.api_key = os.getenv('GPT_TOKEN')
 
 
 class FSMAdmin(StatesGroup):
+    """Group of states FSMAdmin"""
     target = State()
     method = State()
     choose_photo = State()
     photo = State()
 
+    def __eq__(self, other):
+        return self.target == other.target and self.method == other.method \
+               and self.choose_photo == other.choose_photo \
+               and self.photo == other.photo
+
+    def __str__(self):
+        pass
+
 
 class FSMRate(StatesGroup):
+    """Group of states FSMRate"""
     again = State()
     rating = State()
+
+    def __eq__(self, other):
+        return self.again == other.again and self.rating == other.rating
+
+    def __str__(self):
+        pass
 
 
 available_target_names = ['Сделать что-то полезное', 'Поболтать']
@@ -41,10 +56,11 @@ MAX_DIMENSION = 1000
 
 
 async def check_dimensions(message):
+    """Checking dimensions method"""
     file_id = message.photo[1].file_id
-    resp = requests.get(URI_INFO + file_id)
+    resp = requests.get(URI_INFO + file_id, timeout=30)
     img_path = resp.json()['result']['file_path']
-    img = requests.get(URI + img_path)
+    img = requests.get(URI + img_path, timeout=30)
     with Image.open(io.BytesIO(img.content)) as img:
         width, height = img.size
         if abs(height - width) not in {0, 1}:
@@ -57,21 +73,23 @@ async def check_dimensions(message):
 
 
 async def ai_settings(message: types.Message):
+    """Method with AI settings"""
     await FSMAdmin.target.set()
     await message.reply('Выбери цель общения', reply_markup=kb_target_settings)
 
 
 async def choose_target(message: types.Message, state: FSMContext):
+    """Method for choosing target"""
     if message.text not in available_target_names:
         await message.reply(
             'Пожалуйста, выбери вариант из предложенных',
             reply_markup=kb_target_settings
-            )
+        )
     elif message.text == 'Сделать что-то полезное':
         await message.reply(
             'Вот список того, что ты можешь сделать при помощи бота:',
             reply_markup=kb_useful_settings
-            )
+        )
         await state.finish()
     else:
         async with state.proxy() as data:
@@ -80,15 +98,16 @@ async def choose_target(message: types.Message, state: FSMContext):
         await message.reply(
             'Выбери в каком виде хочешь получать ответы от бота',
             reply_markup=kb_method_settings
-            )
+        )
 
 
 async def choose_method(message: types.Message, state: FSMContext):
+    """Method for method choosing"""
     if message.text not in available_method_names:
         await message.reply(
             'Пожалуйста, выбери вариант из предложенных',
             reply_markup=kb_method_settings
-            )
+        )
     elif message.text == 'Видео-кружочки':
         async with state.proxy() as data:
             data['method'] = message.text
@@ -98,7 +117,7 @@ async def choose_method(message: types.Message, state: FSMContext):
                 message.from_user.id, photo=photo,
                 caption='У тебя есть загруженное фото.\nЖелаешь его изменить?',
                 reply_markup=kb_photo_load
-                )
+            )
             await FSMAdmin.next()
         else:
             await message.reply(
@@ -115,16 +134,17 @@ async def choose_method(message: types.Message, state: FSMContext):
 
 
 async def choose_photo(message: types.Message, state: FSMContext):
+    """Method for photo choosing"""
     if message.text not in available_choose_photo_names:
         await message.reply(
             'Пожалуйста, выбери вариант из предложенных',
             reply_markup=kb_photo_load
-            )
+        )
     else:
         if message.text == 'Оставить текущее':
             await message.reply(
                 'Поздоровайся с ботом!', reply_markup=kb_remove
-                )
+            )
             await upload_settings(message, state)
             await state.finish()
         else:
@@ -132,11 +152,12 @@ async def choose_photo(message: types.Message, state: FSMContext):
                 'Загрузи фото для твоего бота.\n\nОбрати внимание:' +
                 '\n - фото должно быть строго квадратным',
                 reply_markup=kb_cancel
-                )
+            )
             await FSMAdmin.next()
 
 
 async def load_photo(message: types.Message, state: FSMContext):
+    """Method for photo loading"""
     if message.content_type == 'photo':
         file_id = await check_dimensions(message)
         if file_id != 0:
@@ -155,6 +176,7 @@ async def load_photo(message: types.Message, state: FSMContext):
 
 
 async def cancel_handler(message: types.Message, state: FSMContext):
+    """Cancelling handler method"""
     current_state = await state.get_state()
     if current_state is not None:
         await state.finish()
@@ -162,20 +184,22 @@ async def cancel_handler(message: types.Message, state: FSMContext):
 
 
 async def get_text_rate(message: types.Message):
+    """Get text rating method"""
     await message.reply('Введите ваш отзыв',
                         reply_markup=kb_cancel)
     await FSMRate.rating.set()
 
 
-async def return_rate_answer(message: types.Message, state: FSMContext):
-    await message.reply(classify(await translate(message.text)),
-                        reply_markup=kb_cancel)
-    await message.answer(message.from_user.id,
-                         'Введите новый отзыв или нажмите кнопку "Отмена"')
+async def return_rate_answer(message: types.Message):
+    """Method for rating returns"""
+    answer = classify(await translate(message.text))
+    await message.reply(answer, reply_markup=kb_cancel)
+    await message.answer('Введите новый отзыв или нажмите кнопку "Отмена"')
     await FSMRate.again.set()
 
 
 async def friend_talk(message: types.Message):
+    """Method for just talking"""
     if await get_method(message) == 'Видео-кружочки':
         response = openai.Completion.create(
             model="text-davinci-003",
@@ -188,9 +212,9 @@ async def friend_talk(message: types.Message):
             stop=["You:"]
         )
         file_id = await get_photo(message)
-        resp = requests.get(URI_INFO + file_id)
+        resp = requests.get(URI_INFO + file_id, timeout=30)
         img_path = resp.json()['result']['file_path']
-        img = (URI + img_path)
+        img = URI + img_path
         await text_to_video(response['choices'][0]['text'], img)
         with open('output.mp4', 'rb') as video:
             await message.answer_video_note(video)
@@ -199,7 +223,7 @@ async def friend_talk(message: types.Message):
             model="text-davinci-003",
             prompt=message.text,
             temperature=0.5,
-            max_tokens=700,
+            max_tokens=1100,
             top_p=1.0,
             frequency_penalty=0.5,
             presence_penalty=0.0,
@@ -208,25 +232,36 @@ async def friend_talk(message: types.Message):
         await message.answer(response['choices'][0]['text'])
 
 
-def register_handlers_settings(dp: Dispatcher):
-    dp.register_message_handler(ai_settings, commands='settings', state=None)
-    dp.register_message_handler(
+def register_handlers_settings(dispatcher: Dispatcher):
+    """Register settings method"""
+    dispatcher.register_message_handler(
+        ai_settings, commands='settings', state=None
+    )
+    dispatcher.register_message_handler(
         ai_settings, Text(equals='Настройки', ignore_case=True), state=None
     )
-    dp.register_message_handler(cancel_handler, state="*", commands='отмена')
-    dp.register_message_handler(
+    dispatcher.register_message_handler(
+        cancel_handler, state="*", commands='отмена'
+    )
+    dispatcher.register_message_handler(
         cancel_handler, Text(equals='отмена', ignore_case=True), state="*"
     )
-    dp.register_message_handler(choose_target, state=FSMAdmin.target)
-    dp.register_message_handler(choose_method, state=FSMAdmin.method)
-    dp.register_message_handler(choose_photo, state=FSMAdmin.choose_photo)
-    dp.register_message_handler(
+    dispatcher.register_message_handler(choose_target, state=FSMAdmin.target)
+    dispatcher.register_message_handler(choose_method, state=FSMAdmin.method)
+    dispatcher.register_message_handler(
+        choose_photo, state=FSMAdmin.choose_photo
+    )
+    dispatcher.register_message_handler(
         load_photo, content_types=['any'], state=FSMAdmin.photo
     )
-    dp.register_message_handler(
+    dispatcher.register_message_handler(
         get_text_rate, Text(equals='Рейтинг по отзыву', ignore_case=True),
         state=None
     )
-    dp.register_message_handler(return_rate_answer, state=FSMRate.rating)
-    dp.register_message_handler(return_rate_answer, state=FSMRate.again)
-    dp.register_message_handler(friend_talk)
+    dispatcher.register_message_handler(
+        return_rate_answer, state=FSMRate.rating
+    )
+    dispatcher.register_message_handler(
+        return_rate_answer, state=FSMRate.again
+    )
+    dispatcher.register_message_handler(friend_talk)

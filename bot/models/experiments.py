@@ -1,10 +1,12 @@
+"""Module for experiments"""
+import os
 import pyttsx3
 import moviepy.editor as mp
-import os
 from googletrans import Translator
 
 
 async def text_to_video(text: str, img: str):
+    """Experiment text to video"""
     engine = pyttsx3.init()
     engine.setProperty('voice', 'ru')
     engine.setProperty("rate", 260)
@@ -18,6 +20,7 @@ async def text_to_video(text: str, img: str):
 
 
 async def translate(text: str):
+    """Experiment with translator"""
     translator = Translator()
     text_answer = translator.translate(text, dest='en').text
     return text_answer

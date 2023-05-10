@@ -1,3 +1,4 @@
+"""Keyboard settings module"""
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton,\
     ReplyKeyboardRemove
 

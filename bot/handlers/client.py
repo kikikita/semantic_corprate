@@ -1,3 +1,4 @@
+"""Client module"""
 from aiogram import types, Dispatcher
 from create_bot import bot
 from keyboards import kb_client
@@ -5,6 +6,7 @@ from db.queries import checking_user
 
 
 async def command_start(message: types.Message):
+    """Start command method"""
     try:
         await bot.send_message(
             message.from_id,
@@ -16,9 +18,13 @@ async def command_start(message: types.Message):
             )
         await checking_user(message)
         await message.delete()
-    except Exception:
+    except RuntimeError:
         await message.reply('Упс, произошли технические шоколадки(')
 
 
-def register_handlers_client(dp: Dispatcher):
-    dp.register_message_handler(command_start, commands=['start', 'help'])
+def register_handlers_client(dispatcher: Dispatcher):
+    """Registration handler method"""
+    dispatcher.register_message_handler(
+        command_start,
+        commands=['start', 'help']
+    )

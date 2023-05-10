@@ -1,3 +1,4 @@
+"""Keyboard rating module"""
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
 

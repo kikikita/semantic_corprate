@@ -1,3 +1,4 @@
+"""Models module"""
 __all__ = ['classify', 'text_to_video', 'translate']
 
 from models.model import classify

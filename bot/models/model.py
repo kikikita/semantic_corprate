@@ -1,5 +1,6 @@
-from transformers import DistilBertTokenizer
+"""Principal model module"""
 import torch
+from transformers import DistilBertTokenizer
 
 
 tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
@@ -7,6 +8,7 @@ model = torch.load('bot/models/distilbert3eps.pth', map_location='cpu')
 
 
 def classify(sentence):
+    """Classification method"""
     print('Отзыв получен ...')
     enc = tokenizer.encode_plus(sentence, max_length=512,
                                 pad_to_max_length=True,
@@ -22,4 +24,4 @@ def classify(sentence):
         attention_mask=attention_mask
     ).logits
     rating = torch.argmax(cls, dim=1).cpu().detach().numpy() + 1
-    return f'Оценка отзыва составляет {rating.item()} звезд'
+    return f'Оценка отзыва: {rating.item()}/5'

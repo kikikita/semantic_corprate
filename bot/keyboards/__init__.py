@@ -1,3 +1,4 @@
+"""Keyboard module"""
 __all__ = ['kb_client',
            'kb_target_settings',
            'kb_method_settings',

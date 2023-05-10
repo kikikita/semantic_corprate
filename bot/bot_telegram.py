@@ -1,3 +1,4 @@
+"""Module for telegram bot"""
 from aiogram.utils import executor
 from create_bot import dp
 from db.queries import sql_start
@@ -5,6 +6,7 @@ from handlers import client, talk
 
 
 async def on_startup(_):
+    """Startup method"""
     print('Бот вышел в онлайн')
     await sql_start()
 
