@@ -23,5 +23,4 @@ jobs:
         pip install pylint
     - name: Analysing the code with pylint
       run: |
-        pylint bot/ --generated-members=numpy.*,torch.*
-        pylint training/ --generated-members=numpy.*,torch.*
+        pylint $(git ls-files '*.py')
