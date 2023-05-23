@@ -1,5 +1,4 @@
 # Semantic-CorpRate
-==============================
 
 This project solves the problem of predicting a company's rating based on text reviews left by customers is an 
 important one for several reasons using sentence transformers
