@@ -4,10 +4,10 @@ from transformers import DistilBertTokenizer
 
 
 tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
-model = torch.load('bot/models/distilbert3eps.pth', map_location='cpu')
+model = torch.load('src/bot/bot_models/distilbert3eps.pth', map_location='cpu')
 
 
-def classify(sentence):
+async def classify(sentence):
     """Classification method"""
     print('Отзыв получен ...')
     enc = tokenizer.encode_plus(sentence, max_length=512,

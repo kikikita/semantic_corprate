@@ -11,8 +11,8 @@ from create_bot import bot
 from keyboards import kb_target_settings, kb_client, kb_method_settings, \
     kb_remove, kb_cancel, kb_useful_settings, kb_photo_load
 from db.queries import upload_settings, get_method, get_photo
-from models import classify, text_to_video, translate
 from PIL import Image
+from bot_models import classify, text_to_video, translate
 
 URI_INFO = f"https://api.telegram.org/bot{os.getenv('TOKEN')}/getFile?file_id="
 URI = f"https://api.telegram.org/file/bot{os.getenv('TOKEN')}/"
@@ -192,7 +192,7 @@ async def get_text_rate(message: types.Message):
 
 async def return_rate_answer(message: types.Message):
     """Method for rating returns"""
-    answer = classify(await translate(message.text))
+    answer = await classify(await translate(message.text))
     await message.reply(answer, reply_markup=kb_cancel)
     await message.answer('Введите новый отзыв или нажмите кнопку "Отмена"')
     await FSMRate.again.set()
@@ -216,8 +216,9 @@ async def friend_talk(message: types.Message):
         img_path = resp.json()['result']['file_path']
         img = URI + img_path
         await text_to_video(response['choices'][0]['text'], img)
-        with open('output.mp4', 'rb') as video:
+        with open('src/bot/temp/output.mp4', 'rb') as video:
             await message.answer_video_note(video)
+            os.remove("src/bot/temp/output.mp4")
     else:
         response = openai.Completion.create(
             model="text-davinci-003",

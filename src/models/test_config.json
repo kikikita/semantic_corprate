@@ -1,0 +1,22 @@
+{
+	"data_config": {
+            "test_data": "data/test_data.csv",
+            "data_column": "Review"
+	},
+	
+	"dataloader_config": {
+			"batch_size": 16,
+			"num_workers": 0
+	},
+	
+	"model_name": "distilbert.pth",
+	"device": "cuda:0",
+	
+	"submission_config": {
+		"submission_file": "data/sample_submission.csv",
+		"submission_name": "submission.csv"
+		
+	}	
+}
+			
+	
