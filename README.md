@@ -4,6 +4,7 @@
 This project solves the problem of predicting a company's rating based on text reviews left by customers is an 
 important one for several reasons using sentence transformers
 
+![2023-05-10 14-29-33](https://github.com/kikikita/semantic_corprate/assets/110126453/57ce329f-54aa-47ec-a9e2-3f0dd6ee71d9)
 
 Telegram bot based on GPT-4 and distilbert.
 
