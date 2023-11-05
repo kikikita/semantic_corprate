@@ -32,10 +32,20 @@ Run docker-compose
 Project Organization
 ------------
 
+    ├── .dvc
+    │   ├── cache          <- DVC cache.
+    │   └── tmp            <- DVC temporary files.
+    │
+    ├── docker
+    │   ├── backend_image  <- Backend docker build file.
+    │   ├── mlflow_image   <- MLflow docker build file.
+    │   ├── .env_example   <- .env file example.
+    │   └── docker-compose.yaml <- docker settings.
+    │
     ├── notebooks          <- Jupyter notebooks with experiments and logs.
     │
     ├── reports            <- A PDF with motivation, experiments setup and results.
-    │   └── figures        <- Generated graphics and figures used in reporting
+    │   └── figures        <- Generated graphics and figures used in reporting.
     │
     ├── src                <- Source code for use in this project.
     │   ├── bot
@@ -47,20 +57,21 @@ Project Organization
     │   │   ├── bot_telegram.py <- Starting bot.
     │   │   └── create_bot.py   <- Create bot.
     │   └── models         <- Scripts to train models and then use trained models to make
-    │       │                 predictions
-    │       ├── launch_train.sh <- Sh script to start training models
+    │       │                 predictions.
+    │       ├── launch_train.sh <- Sh script to start training models.
     │       ├── train_config.json
     │       └── train_model.py
     │
-    ├── docker-compose.yaml <- docker settings
-    │
-    ├── Dockerfile         <- makes project pip installable so src can be imported in docker container
-    │
     ├── LICENSE
+    │
+    ├── mlflow_test.py     <- MLflow test file.
     │
     ├── README.md          <- The top-level README for developers using this project.
     │
-    └── requirements.txt   <- The requirements file for reproducing the analysis environment
+    ├── requirements.txt   <- The requirements file for reproducing the analysis environment.
+    │
+    └── tox.ini            <- tox file with settings for running tox; see tox.readthedocs.io
+
 
 --------
 
