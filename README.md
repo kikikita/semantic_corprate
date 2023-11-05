@@ -85,7 +85,7 @@ and Rating - Number of stars awarded by customer, between 1 and 5. The samples a
 to: 60% train, 10% public leaderboard and 30% private leaderboard. The target is a star rating between 
 1 and 5. Data distribution shown below.
 
-<p align="center"><img src="./reports/figures/div.png" alt="detection" width="85%"></p>
+<p align="center"><img src="./reports/figures/div.png" alt="detection" width="100%"></p>
 
 # Model
 
@@ -104,7 +104,7 @@ During training, 50% of the inputs are a pair in which the second sentence is th
 document, while in the other 50% a random sentence from the corpus is chosen as the second sentence. The assumption is 
 that the random sentence will be disconnected from the first sentence. This approach is called fine-tuning.
 
-<p align="center"><img src="./reports/figures/image.png" alt="detection" width="85%"></p>
+<p align="center"><img src="./reports/figures/image.png" alt="detection" width="100%"></p>
 
 ## Hyperparameters
 We denote the number of layers (i.e., Transformer blocks) as L, the hidden size as H, and the number of self-attention 
