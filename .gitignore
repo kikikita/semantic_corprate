@@ -133,3 +133,6 @@ dmypy.json
 image.jpg
 output.mp4
 audio.mp3
+.DS_Store
+/data
+/minio

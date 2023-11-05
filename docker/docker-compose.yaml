@@ -1,0 +1,82 @@
+version: "3"
+services:
+
+  database:
+    container_name: database
+    image: postgres:14
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready
+        - -U
+        - admin
+    networks:
+      - postgres
+
+  backend:
+    container_name: backend
+    image: semantic_bot:latest
+    environment:
+      PG_NAME: ${POSTGRES_DB}
+      PG_USER: ${POSTGRES_USER}
+      PG_PASSWORD: ${POSTGRES_PASSWORD}
+      PG_HOST: database
+      PG_PORT: 5432
+      TOKEN: ${TOKEN}
+      GPT_TOKEN: ${GPT_TOKEN}
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - postgres
+
+  minio:
+    container_name: minio
+    image: quay.io/minio/minio:RELEASE.2022-05-08T23-50-31Z
+    command: server --console-address ":9001" /data/
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    environment:
+      MINIO_ACCESS_KEY: ${AWS_ACCESS_KEY_ID}
+      MINIO_SECRET_KEY: ${AWS_SECRET_ACCESS_KEY}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - minio_app
+    volumes:
+      - ./minio/:/data
+
+  mlflow:
+    container_name: mlflow_server
+    restart: always
+    build: ./mlflow_image
+    image: mlflow_server
+    ports:
+      - "5000:5000"
+    networks:
+      - postgres
+      - minio_app
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - MLFLOW_S3_ENDPOINT_URL=http://minio:9000
+    command: mlflow server --backend-store-uri postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${POSTGRES_DB} --default-artifact-root s3://${AWS_S3_BUCKET}/ --host 0.0.0.0
+
+volumes:
+  postgres:
+
+networks:
+  postgres:
+    driver: bridge
+  minio_app:
+    driver: bridge
