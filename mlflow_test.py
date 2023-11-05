@@ -2,7 +2,7 @@ import os
 import mlflow
 from mlflow.models.signature import infer_signature
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics import roc_auc_score, precision_score,\
+from sklearn.metrics import roc_auc_score, precision_score, \
         recall_score, f1_score
 from lightgbm import LGBMClassifier
 

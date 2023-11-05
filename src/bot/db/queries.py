@@ -4,7 +4,7 @@ from aiogram import types
 from sqlalchemy import select, update
 from sqlalchemy.orm import selectinload
 from sqlalchemy.engine import URL
-from db import BaseModel, User, create_async_engine,\
+from db import BaseModel, User, create_async_engine, \
     get_session_maker, proceed_schemas
 
 
